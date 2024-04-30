@@ -1,0 +1,36 @@
+[tool.ruff]
+line-length = 119
+target-version = "py39"
+
+[tool.poetry]
+name = "lczero-planning"
+version = "0.1.0"
+description = "Interpreting planning in LeelaChessZero networks."
+readme = "README.md"
+license = "MIT"
+authors = [
+    "Yoann Poupart <yoann.poupart@ens-lyon.org>",
+]
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "default"
+
+[build-system]
+requires = ["poetry-core>=1.6.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "*"
+
+[tool.poetry.group.demo]
+optional = true
+
+[tool.poetry.group.demo.dependencies]
+gradio = "^4.14.0"
