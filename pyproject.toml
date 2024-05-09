@@ -24,7 +24,8 @@ build-backend = "poetry.core.masonry.api"
 python = "^3.9"
 datasets = "^2.19.0"
 loguru = "^0.7.2"
-lczerolens = {git = "https://github.com/Xmaster6y/lczerolens", rev = "cleaning"}
+lczerolens = {git = "https://github.com/Xmaster6y/lczerolens", rev = "self-play"}
+wandb = "^0.16.6"
 
 [tool.poetry.group.dev]
 optional = true
