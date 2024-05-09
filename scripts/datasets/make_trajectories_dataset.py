@@ -1,8 +1,8 @@
-"""Script to generate the concepts datasets.
+"""Script to generate the trajectories datasets.
 
 Run with:
 ```bash
-poetry run python -m scripts.datasets.make_concepts_dataset
+poetry run python -m scripts.datasets.make_trajectories_dataset
 ```
 """
 
@@ -42,7 +42,9 @@ class BatchedPolicySampler:
             batched_policy = all_stats["policy"]
         for board, policy in zip(boards, batched_policy):
             us = board.turn
-            indices = torch.tensor([move_encodings.encode_move(move, (us, not us)) for move in board.legal_moves])
+            indices = torch.tensor([move_encodings.encode_move(move, (us, not us)) for move in board.legal_moves]).to(
+                DEVICE
+            )
             legal_policy = policy.gather(0, indices)
             if self.use_argmax:
                 idx = legal_policy.argmax()
@@ -202,8 +204,25 @@ def main(args: argparse.Namespace):
             )
 
 
+@dataclass
+class Args:
+    source_dataset: str = "Xmaster6y/lczero-planning-boards"
+    dataset_name: str = "Xmaster6y/lczero-planning-trajectories"
+    push_to_hub: bool = False
+    use_policy: bool = True
+    model_category: str = "small"
+    use_all_models: bool = False
+    train_samples: int = 100_000
+    test_samples: int = 10_000
+    restart: bool = False
+    max_depth: int = 15
+    suboptimal_resample: int = 1
+    batch_size: int = 1000
+    num_proc: int = 1
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser("make-concepts-dataset")
+    parser = argparse.ArgumentParser("make-trajectories-dataset")
     parser.add_argument(
         "--source_dataset",
         type=str,
@@ -212,7 +231,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="Xmaster6y/lczero-planning-concepts",
+        default="Xmaster6y/lczero-planning-trajectories",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--use_policy", action=argparse.BooleanOptionalAction, default=True)
@@ -231,20 +250,3 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
     main(args)
-
-
-@dataclass
-class Args:
-    source_dataset: str = "Xmaster6y/lczero-planning-boards"
-    dataset_name: str = "Xmaster6y/lczero-planning-concepts"
-    push_to_hub: bool = False
-    use_policy: bool = True
-    model_category: str = "small"
-    use_all_models: bool = False
-    train_samples: int = 100_000
-    test_samples: int = 10_000
-    restart: bool = False
-    max_depth: int = 10
-    suboptimal_resample: int = 1
-    batch_size: int = 1000
-    num_proc: int = 1

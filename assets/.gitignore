@@ -1,4 +1,4 @@
 *
 !.gitignore
 !records.txt
-!resolve-assets.sh
+!resolve*
