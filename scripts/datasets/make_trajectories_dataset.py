@@ -60,7 +60,7 @@ class BatchedPolicySampler:
 def make_samplers(
     model: str,
 ):
-    wrapper = ModelWrapper.from_onnx_path(f"./assets/{model}").to(DEVICE)
+    wrapper = ModelWrapper.from_onnx_path(f"./assets/models/{model}").to(DEVICE)
     optimal_sampler = BatchedPolicySampler(
         wrapper=wrapper,
         use_argmax=True,
