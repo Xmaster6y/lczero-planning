@@ -76,9 +76,9 @@ def batched_sample_trajectory(
     batch,
     sampler: BatchedPolicySampler,
     max_depth: int,
-    label: int,
+    suffix: str,
 ):
-    output_batch = {"gameid": [], "fen": [], "moves": [], "depth": [], "label": []}
+    output_batch = {"gameid": [], "fen": [], f"moves_{suffix}": [], f"depth_{suffix}": []}
     boards = []
     for fen, moves in zip(batch["fen"], batch["moves"]):
         board = chess.Board(fen)
@@ -99,9 +99,8 @@ def batched_sample_trajectory(
             if board.is_game_over() or (depth > 4 and i == 2):
                 output_batch["gameid"].append(gameids[i])
                 output_batch["fen"].append(fens[i])
-                output_batch["moves"].append(all_moves[i])
-                output_batch["depth"].append(depth)
-                output_batch["label"].append(label)
+                output_batch[f"moves_{suffix}"].append(all_moves[i])
+                output_batch[f"depth_{suffix}"].append(depth)
             else:
                 working_boards.append(board)
                 working_moves.append(all_moves[i].copy())
@@ -121,9 +120,8 @@ def batched_sample_trajectory(
     for i in range(len(boards)):
         output_batch["gameid"].append(gameids[i])
         output_batch["fen"].append(fens[i])
-        output_batch["moves"].append(all_moves[i])
-        output_batch["depth"].append(depth)
-        output_batch["label"].append(label)
+        output_batch[f"moves_{suffix}"].append(all_moves[i])
+        output_batch[f"depth_{suffix}"].append(depth)
     return output_batch
 
 
@@ -134,11 +132,11 @@ def map_fn(
     suboptimal_resample: int,
 ):
     otpimal_sampler, suboptimal_sampler = samplers
-    output_batch = batched_sample_trajectory(batch, otpimal_sampler, max_depth, 1)
-    for _ in range(suboptimal_resample):
-        suboptimal_batch = batched_sample_trajectory(batch, suboptimal_sampler, max_depth, 0)
-        for k in output_batch:
-            output_batch[k].extend(suboptimal_batch[k])
+    output_batch = batched_sample_trajectory(batch, otpimal_sampler, max_depth, "opt")
+    for i in range(suboptimal_resample):
+        suboptimal_batch = batched_sample_trajectory(batch, suboptimal_sampler, max_depth, f"sub{i}")
+        output_batch[f"moves_sub{i}"] = suboptimal_batch[f"moves_sub{i}"]
+        output_batch[f"depth_sub{i}"] = suboptimal_batch[f"depth_sub{i}"]
     return output_batch
 
 
