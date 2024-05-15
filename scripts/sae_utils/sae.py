@@ -12,25 +12,22 @@ class SparseAutoEncoder(nn.Module):
     A 2-layer sparse autoencoder.
     """
 
-    def __init__(self, activation_dim, dict_size, pre_bias=False, less_than_1=False):
+    def __init__(
+        self,
+        activation_dim,
+        dict_size,
+        pre_bias=False,
+        init_normalise_dict=None,
+    ):
         super().__init__()
         self.activation_dim = activation_dim
         self.dict_size = dict_size
         self.pre_bias = pre_bias
-        self.less_than_1 = less_than_1
+        self.init_normalise_dict = init_normalise_dict
 
-        self.W_enc = nn.Parameter(
-            torch.nn.init.kaiming_uniform_(
-                torch.empty(
-                    self.activation_dim,
-                    self.dict_size,
-                )
-            )
-        )
         self.b_enc = nn.Parameter(torch.zeros(self.dict_size))
         self.relu = nn.ReLU()
 
-        self.normalize_dict_()
         self.W_dec = nn.Parameter(
             torch.nn.init.kaiming_uniform_(
                 torch.empty(
@@ -39,6 +36,13 @@ class SparseAutoEncoder(nn.Module):
                 )
             )
         )
+        if init_normalise_dict == "l2":
+            self.normalize_dict_(less_than_1=False)
+            self.W_dec *= 0.1
+        elif init_normalise_dict == "less_than_1":
+            self.normalize_dict_(less_than_1=True)
+
+        self.W_enc = nn.Parameter(self.W_dec.t())
         self.b_dec = nn.Parameter(
             torch.zeros(
                 self.activation_dim,
@@ -46,9 +50,12 @@ class SparseAutoEncoder(nn.Module):
         )
 
     @torch.no_grad()
-    def normalize_dict_(self):
+    def normalize_dict_(
+        self,
+        less_than_1=False,
+    ):
         norm = self.W_dec.norm(dim=1)
-        if self.less_than_1:
+        if less_than_1:
             greater_than_1_mask = norm > 1
             self.W_dec[greater_than_1_mask] /= norm[greater_than_1_mask].unsqueeze(1)
         else:
