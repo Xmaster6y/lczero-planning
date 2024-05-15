@@ -1,0 +1,25 @@
+command:
+  - poetry
+  - run
+  - python
+  - -m
+  - ${program}
+  - ${args}
+method: bayes
+metric:
+  goal: maximize
+  name: val/r2_score
+parameters:
+  dict_size_scale:
+    distribution: int_uniform
+    max: 100
+    min: 1
+  lr:
+    distribution: log_uniform_values
+    max: 1e-3
+    min: 1e-5
+  sparsity_penalty:
+    distribution: log_uniform_values
+    max: 1
+    min: 5e-3
+program: scripts.train.train_one
