@@ -9,6 +9,7 @@ poetry run python -m scripts.datasets.make_trajectories_dataset
 import argparse
 from dataclasses import dataclass
 from typing import List
+import copy
 
 import chess
 from datasets import load_dataset, DatasetDict
@@ -51,7 +52,7 @@ class BatchedPolicySampler:
             else:
                 if self.use_suboptimal:
                     idx = legal_policy.argmax()
-                    legal_policy[idx] = torch.tensor(-1e3)
+                    legal_policy[idx] = torch.tensor(-1e8)
                 m = Categorical(logits=legal_policy)
                 idx = m.sample()
             yield list(board.legal_moves)[idx]
@@ -78,50 +79,29 @@ def batched_sample_trajectory(
     max_depth: int,
     suffix: str,
 ):
-    output_batch = {"gameid": [], "fen": [], f"moves_{suffix}": [], f"depth_{suffix}": []}
+    output_batch = {f"moves_{suffix}": [], f"depth_{suffix}": []}
+    all_moves = copy.deepcopy(batch["moves"])
+    fens = batch["fen"]
+
     boards = []
-    for fen, moves in zip(batch["fen"], batch["moves"]):
+    for fen, moves in zip(fens, all_moves):
         board = chess.Board(fen)
         for move in moves:
             board.push(chess.Move.from_uci(move))
         boards.append(board)
 
-    depth = 0
-    all_moves = batch["moves"]
-    gameids = batch["gameid"]
-    fens = batch["fen"]
-    while depth < max_depth and len(boards) > 0:
-        working_boards = []
-        working_moves = []
-        working_gameids = []
-        working_fens = []
-        for i, board in enumerate(boards):
-            if board.is_game_over() or (depth > 4 and i == 2):
-                output_batch["gameid"].append(gameids[i])
-                output_batch["fen"].append(fens[i])
-                output_batch[f"moves_{suffix}"].append(all_moves[i])
-                output_batch[f"depth_{suffix}"].append(depth)
-            else:
-                working_boards.append(board)
-                working_moves.append(all_moves[i].copy())
-                working_gameids.append(gameids[i])
-                working_fens.append(fens[i])
-        if len(working_boards) == 0:
-            break
-        next_moves = sampler.get_next_moves(working_boards)
-        for i, (board, move) in enumerate(zip(working_boards, next_moves)):
+    for _ in range(max_depth):
+        next_moves = sampler.get_next_moves(boards)
+        for i, (board, move) in enumerate(zip(boards, next_moves)):
             board.push(move)
-            working_moves[i].append(move.uci())
-        depth += 1
-        boards = working_boards
-        all_moves = working_moves
-        gameids = working_gameids
-        fens = working_fens
+            if board.is_game_over():
+                board.pop()
+                continue
+            all_moves[i].append(move.uci())
+
     for i in range(len(boards)):
-        output_batch["gameid"].append(gameids[i])
-        output_batch["fen"].append(fens[i])
         output_batch[f"moves_{suffix}"].append(all_moves[i])
-        output_batch[f"depth_{suffix}"].append(depth)
+        output_batch[f"depth_{suffix}"].append(len(all_moves[i]) - 7)
     return output_batch
 
 

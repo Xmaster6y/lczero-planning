@@ -9,6 +9,7 @@ poetry run python -m scripts.datasets.make_activations_dataset
 import re
 import argparse
 from dataclasses import dataclass
+import copy
 
 import chess
 from datasets import load_dataset, DatasetDict, Dataset
@@ -23,74 +24,79 @@ from scripts.constants import HF_TOKEN, SMALL_MODELS, MEDIUM_MODELS, BIG_MODELS
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def merge_gens(gens):
-    def new_gen():
-        for gen in gens:
-            yield from gen()
-
-    return new_gen
-
-
-def make_batch_gen(batch, infos, out_name):
-    def gen():
-        for tensor, info in zip(batch, infos):
-            yield {out_name: tensor.cpu().float().numpy(), **info}
-
-    return gen
+def make_batch_gen(wdls, acts, infos):
+    prev_root = None
+    prev_opt = None
+    for wdl, act, info in zip(wdls, acts, infos):
+        is_root = info.pop("is_root")
+        if is_root:
+            prev_root = (wdl, act, info)
+            prev_opt = None
+            continue
+        if "opt_fen" in info:
+            prev_opt = (wdl, act, info)
+            continue
+        root_wdl, root_act, root_info = prev_root
+        opt_wdl, opt_act, opt_info = prev_opt
+        info["root_fen"] = root_info["root_fen"]
+        info["opt_fen"] = opt_info["opt_fen"]
+        info["root_act"] = root_act
+        info["opt_act"] = opt_act
+        info["sub_act"] = act
+        info["root_wdl"] = root_wdl
+        info["opt_wdl"] = opt_wdl
+        info["sub_wdl"] = wdl
+        prev_opt = None
+        yield info
 
 
 @torch.no_grad
-def make_gen_list(gen_dict, dataloaders, wrapper, cache_hook):
-    module_exp = re.compile(r".*block(?P<layer>\d+)$")
-    for split, dataloader in dataloaders.items():
-        for batch in dataloader:
-            boards, infos = batch
-            wrapper.predict(boards)
-            logger.info(f"Processed batch of size {len(boards)}")
-            for module, batched_activations in cache_hook.storage.items():
-                m = module_exp.match(module)
-                layer = m.group("layer")
-                if layer not in gen_dict:
-                    gen_dict[layer] = {"test": [], "train": []}
-                gen_dict[layer][split].append(make_batch_gen(batched_activations[0].detach(), infos, "activation"))
+def gen_fn(dataloader, wrapper, cache_hook, layer):
+    module_exp = re.compile(rf".*block{layer}/conv2/relu")
+    for batch in dataloader:
+        boards, infos = batch
+        stats = wrapper.predict(boards)[0]
+        for module, batched_activations in cache_hook.storage.items():
+            m = module_exp.match(module)
+            if m is None:
+                raise ValueError(f"Invalid module: {module}")
+            yield from make_batch_gen(
+                stats["wdl"].detach().cpu().float().numpy(), batched_activations.detach().cpu().float().numpy(), infos
+            )
 
 
 def param_collate_fn(batch, min_depth):
     boards, infos = [], []
     for x in batch:
         fen = x["fen"]
-        moves = x["moves"]
+        moves_opt = x["moves_opt"]
+        moves_sub = x["moves_sub0"]
         board = chess.Board(fen)
         root_fen = None
-        for i, move in enumerate(moves):
-            board.push(chess.Move.from_uci(move))
-            if i + 1 == 7:
-                root_fen = board.fen()
-            if i + 1 >= min_depth + 7:
-                x["root_fen"] = root_fen
-                x["current_depth"] = i + 1 - 7
-                boards.append(board.copy(stack=7))
-                infos.append(x)
+        max_depth = min(len(moves_opt), len(moves_sub))
+        if max_depth < min_depth + 7:
+            continue
+        for i in range(7):
+            board.push(chess.Move.from_uci(moves_opt[i]))
+        root_fen = board.fen()
+        x["root_fen"] = root_fen
+        x["is_root"] = True
+        boards.append(board.copy(stack=7))
+        infos.append(copy.deepcopy(x))
+        board_opt = board.copy(stack=7)
+        board_sub = board.copy(stack=7)
+        for i, (move_opt, move_sub) in enumerate(zip(moves_opt[7:], moves_sub[7:])):
+            board_opt.push(chess.Move.from_uci(move_opt))
+            board_sub.push(chess.Move.from_uci(move_sub))
+            if i + 1 >= min_depth:
+                x["is_root"] = False
+                x["current_depth"] = i + 1
+                boards.append(board_opt.copy())
+                infos.append({**copy.deepcopy(x), "opt_fen": board_opt.fen()})
+                boards.append(board_sub.copy())
+                infos.append({**copy.deepcopy(x), "sub_fen": board_sub.fen()})
+
     return boards, infos
-
-
-def make_gen_dict(dataset, wrapper, cache_hook, batch_size, min_depth):
-    gen_dict = {}
-    splits = ["train", "test"]
-
-    def collate_fn(batch):
-        return param_collate_fn(batch, min_depth)
-
-    dataloaders = {
-        split: DataLoader(
-            dataset[split],
-            batch_size=batch_size,
-            collate_fn=collate_fn,
-        )
-        for split in splits
-    }
-    make_gen_list(gen_dict, dataloaders, wrapper, cache_hook)
-    return {config: {split: merge_gens(gen_dict[config][split]) for split in splits} for config in gen_dict}
 
 
 def main(args: argparse.Namespace):
@@ -112,25 +118,42 @@ def main(args: argparse.Namespace):
     for model in selected_models:
         config_name = f"{args.source_config}_{model}"
         wrapper = ModelWrapper.from_onnx_path(f"./assets/models/{model}").to(DEVICE)
-        filtered_dataset = dataset.filter(lambda s: s["depth"] >= args.min_depth)
-        cache_hook = CacheHook(HookConfig(module_exp=r".*block\d+$"))
+        filtered_dataset = dataset.filter(
+            lambda s: s["depth_opt"] >= args.min_depth and s["depth_sub0"] >= args.min_depth
+        )  # .filter(lambda s,i: i<=1000, with_indices=True)
+        cache_hook = CacheHook(HookConfig(module_exp=rf".*block{args.layer}/conv2/relu"))
         cache_hook.register(wrapper)
-        gen_dict = make_gen_dict(filtered_dataset, wrapper, cache_hook, args.batch_size, args.min_depth)
-        for sub_config in gen_dict:
-            dataset_dict = DatasetDict(
-                {split: Dataset.from_generator(gen_dict[sub_config][split]) for split in ["train", "test"]}
+
+        _dataset_dict = {}
+        for split in ["train", "test"]:
+
+            def collate_fn(batch):
+                return param_collate_fn(batch, args.min_depth)
+
+            dataloader = DataLoader(
+                filtered_dataset[split],
+                batch_size=args.batch_size,
+                collate_fn=collate_fn,
             )
-            full_config = f"{config_name}_{sub_config}"
+            _dataset_dict[split] = Dataset.from_generator(
+                gen_fn,
+                gen_kwargs={
+                    "dataloader": dataloader,
+                    "wrapper": wrapper,
+                    "cache_hook": cache_hook,
+                    "layer": args.layer,
+                },
+            )
 
-            logger.info(f"Processed dataset: {dataset_dict}")
-
-            if args.push_to_hub:
-                logger.info("Pushing to hub...")
-                dataset_dict.push_to_hub(
-                    repo_id=args.dataset_name,
-                    token=HF_TOKEN,
-                    config_name=full_config,
-                )
+        dataset_dict = DatasetDict(_dataset_dict)
+        logger.info(f"Processed dataset: {dataset_dict}")
+        if args.push_to_hub:
+            logger.info("Pushing to hub...")
+            dataset_dict.push_to_hub(
+                repo_id=args.dataset_name,
+                token=HF_TOKEN,
+                config_name=f"{config_name}_{args.layer}",
+            )
 
 
 @dataclass
@@ -141,6 +164,7 @@ class Args:
     push_to_hub: bool = False
     model_category: str = "small"
     use_all_models: bool = False
+    layer: str = "9"
     min_depth: int = 10
     batch_size: int = 1000
 
@@ -165,6 +189,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--model_category", type=str, default="small")
     parser.add_argument("--use_all_models", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--layer", type=str, default="9")
     parser.add_argument("--min_depth", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=1000)
     return parser.parse_args()
