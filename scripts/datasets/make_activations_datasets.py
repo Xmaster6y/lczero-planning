@@ -120,7 +120,9 @@ def main(args: argparse.Namespace):
         wrapper = ModelWrapper.from_onnx_path(f"./assets/models/{model}").to(DEVICE)
         filtered_dataset = dataset.filter(
             lambda s: s["depth_opt"] >= args.min_depth and s["depth_sub0"] >= args.min_depth
-        )  # .filter(lambda s,i: i<=1000, with_indices=True)
+        )
+        if args.debug:
+            filtered_dataset = filtered_dataset.select(range(100))
         cache_hook = CacheHook(HookConfig(module_exp=rf".*block{args.layer}/conv2/relu"))
         cache_hook.register(wrapper)
 
@@ -152,7 +154,7 @@ def main(args: argparse.Namespace):
             dataset_dict.push_to_hub(
                 repo_id=args.dataset_name,
                 token=HF_TOKEN,
-                config_name=f"{config_name}_{args.layer}",
+                config_name="debug" if args.debug else f"{config_name}_{args.layer}",
             )
 
 
@@ -167,6 +169,7 @@ class Args:
     layer: str = "9"
     min_depth: int = 10
     batch_size: int = 1000
+    debug: bool = False
 
 
 def parse_args() -> argparse.Namespace:
@@ -192,6 +195,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layer", type=str, default="9")
     parser.add_argument("--min_depth", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=1000)
+    parser.add_argument("--debug", action=argparse.BooleanOptionalAction, default=False)
     return parser.parse_args()
 
 
