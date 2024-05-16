@@ -26,7 +26,10 @@ hf_api = HfApi(token=HF_TOKEN)
 def main(args):
     logger.info(f"Running on {DEVICE}")
     hf_api.snapshot_download(repo_id=args.repo_id, repo_type="model", local_dir="./assets/saes")
-    ae = torch.load(f"./assets/saes/{args.source_config}/model.pt")
+    ae = torch.load(
+        f"./assets/saes/{args.source_config}/model.pt",
+        map_location=DEVICE,
+    )
 
     init_ds = load_dataset(args.source_dataset, args.source_config, split="test")
     torch_ds = init_ds.with_format("torch")
@@ -39,7 +42,10 @@ def main(args):
         new_s_batched["pixel_index"] = einops.repeat(torch.arange(h * w), "hw -> (b hw) ", b=b)
         for k, v in s_batched.items():
             if isinstance(v, torch.Tensor):
-                new_s_batched[k] = einops.repeat(v, "b r -> (b hw) r", hw=h * w)
+                if v.ndim == 2:
+                    new_s_batched[k] = einops.repeat(v, "b r -> (b hw) r", hw=h * w)
+                else:
+                    new_s_batched[k] = einops.repeat(v, "b -> (b hw) ", hw=h * w)
             else:
                 new_s_batched[k] = v * (h * w)
         return new_s_batched
@@ -50,11 +56,15 @@ def main(args):
         root_activations = batch["root_act"]
         opt_activations = batch["opt_act"]
         sub_activations = batch["sub_act"]
-        d_activations = torch.cat([opt_activations, sub_activations], dim=0)
-        activations = torch.cat([root_activations.repeat(2, 1), d_activations], dim=1)
+        activations = torch.cat([root_activations, opt_activations], dim=1)
+        activations = activations.to(DEVICE)
         f_pre = ae.encode(activations)
-        f = ae.relu(f_pre)
-        return {"features": f}
+        opt_f = ae.relu(f_pre)
+        activations = torch.cat([root_activations, sub_activations], dim=1)
+        activations = activations.to(DEVICE)
+        f_pre = ae.encode(activations)
+        sub_f = ae.relu(f_pre)
+        return {"opt_features": opt_f, "sub_features": sub_f}
 
     features_dataset = dataset.map(
         compute_features_fn,
