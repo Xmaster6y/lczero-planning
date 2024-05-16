@@ -63,7 +63,7 @@ def make_contrastive_run(
         new_s_batched = {}
         for act_type in ["root_act", "opt_act", "sub_act"]:
             new_s_batched[act_type] = einops.rearrange(s_batched[act_type], "b c h w -> (b h w) c")
-        new_s_batched["pixel_index"] = einops.repeat(torch.arange(h * w), "(h w) -> (b h w) ", b=b)
+        new_s_batched["pixel_index"] = einops.repeat(torch.arange(h * w), "(hw) -> (b hw) ", b=b)
         return new_s_batched
 
     dataset = torch_ds.map(map_fn, batched=True)
