@@ -49,7 +49,7 @@ def main(args):
     run_config = ContrastiveRunConfig(
         **run_params,
     )
-    save_folder = f"./assets/models/{args.source_config}"
+    save_folder = f"./assets/saes/{args.source_config}"
     with wandb.init(entity="yp-edu", project="contrastive-saes", config=run_params) as wandb_run:
         try:
             make_contrastive_run(run_config, wandb_run=wandb_run, save_folder=save_folder)
