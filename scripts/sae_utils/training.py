@@ -27,9 +27,7 @@ def entropy(p, eps=1e-8):
 
 
 def ghost_loss_fn(out, activations):
-    x_ghost = out.get("x_ghost")
-    if x_ghost is None:
-        return None
+    x_ghost = out["x_ghost"]
     x_hat = out["x_hat"]
     residual = activations - x_hat
     x_ghost = (
@@ -57,8 +55,10 @@ def sae_loss(
     If num_samples_since_activated is not None, update it in place
     If ghost_threshold is not None, use it to do ghost grads
     """
-    if isinstance(acts, tuple):
-        root_activations, opt_activations, sub_activations = acts
+    if isinstance(acts, dict):
+        root_activations = acts["root_act"]
+        opt_activations = acts["opt_act"]
+        sub_activations = acts["sub_act"]
         d_activations = t.cat([opt_activations, sub_activations], dim=0)
         activations = t.cat([root_activations.repeat(2, 1), d_activations], dim=1)
         use_contrastive_loss = True
@@ -90,7 +90,10 @@ def sae_loss(
 
     l0_loss = (f > 0).sum(dim=-1).float().mean()
     dead_loss = deads.float().mean()
-    ghost_loss = ghost_loss_fn(out, activations)
+    if ghost_mask is not None:
+        ghost_loss = ghost_loss_fn(out, activations)
+    else:
+        ghost_loss = None
 
     if sparsity_loss_type == "entropy":
         sparsity_loss = entropy(f)
@@ -257,8 +260,8 @@ def trainSAE(
 
             if isinstance(acts, t.Tensor):  # typical casse
                 acts = acts.to(device)
-            elif isinstance(acts, tuple):
-                acts = tuple(a.to(device) for a in acts)
+            elif isinstance(acts, dict):
+                acts = {k: v.to(device) for k, v in acts.items()}
 
             optimizer.zero_grad()
             # updates num_samples_since_activated in place
@@ -309,8 +312,12 @@ def trainSAE(
                     if step % val_steps == 0:
                         val_losses = {}
                         for val_acts in val_dataloader:
+                            if isinstance(val_acts, t.Tensor):
+                                val_acts = val_acts.to(device)
+                            elif isinstance(val_acts, dict):
+                                val_acts = {k: v.to(device) for k, v in val_acts.items()}
                             losses = sae_loss(
-                                val_acts.to(device),
+                                val_acts,
                                 ae,
                                 sparsity_penalty,
                                 sparsity_loss_type=sparsity_loss_type,

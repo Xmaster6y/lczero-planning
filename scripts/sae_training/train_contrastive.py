@@ -28,8 +28,8 @@ def main(args):
     logger.info(f"Running on {DEVICE}")
     best_params: Dict[str, Any] = {
         "batch_size": args.batch_size,
-        "log_steps": 100,
-        "val_steps": 1000,
+        "log_steps": args.log_steps,
+        "val_steps": args.val_steps,
         "n_epochs": 50,
         "beta1": 0.0,
         "beta2": 0.999,
@@ -80,8 +80,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", type=int, default=1000)
-    parser.add_argument("--lr", type=float, default=5e-4)
+    parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--dict_size_scale", type=int, default=1)
+    parser.add_argument("--log_steps", type=int, default=100)
+    parser.add_argument("--val_steps", type=int, default=1000)
     return parser.parse_args()
 
 
