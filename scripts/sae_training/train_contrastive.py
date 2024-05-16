@@ -38,10 +38,10 @@ def main(args):
         "warmup_steps": 1_000,
         "cooldown_steps": 1_000,
         "dict_size_scale": args.dict_size_scale,
-        "sparsity_penalty_target": 0.1,
+        "sparsity_penalty_target": 0.001,
         "sparsity_loss_type": "sq-l1",
         "sparsity_penalty_warmup_steps": 1_000,
-        "contrastive_penalty": 1.0,
+        "contrastive_penalty": 0.001,
         "contrastive_loss_type": "diff-prod",
     }
     run_params = best_params.copy()
@@ -81,7 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", type=int, default=1000)
     parser.add_argument("--lr", type=float, default=5e-5)
-    parser.add_argument("--dict_size_scale", type=int, default=1)
+    parser.add_argument("--dict_size_scale", type=int, default=30)
     parser.add_argument("--log_steps", type=int, default=100)
     parser.add_argument("--val_steps", type=int, default=1000)
     return parser.parse_args()

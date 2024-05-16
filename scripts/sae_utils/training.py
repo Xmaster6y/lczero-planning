@@ -6,11 +6,13 @@ import os
 
 from loguru import logger
 import torch as t
+from torch.nn.utils import clip_grad_norm_
 from sklearn.metrics import explained_variance_score, r2_score
 
 from .sae import SparseAutoEncoder
 
 EPS = 1e-8
+t.autograd.set_detect_anomaly(True)
 
 
 def entropy(p, eps=1e-8):
@@ -97,8 +99,6 @@ def sae_loss(
 
     if sparsity_loss_type == "entropy":
         sparsity_loss = entropy(f)
-    elif sparsity_loss_type == "sq-l1":
-        sparsity_loss = f.sqrt().norm(p=1, dim=-1).mean()
     elif sparsity_loss_type == "d-l1":
         sparsity_loss = (f.abs() * ae.W_dec.norm(dim=-1)).sum(dim=-1).mean()
     else:
@@ -124,7 +124,7 @@ def sae_loss(
             raise NotImplementedError(f"Contrastive loss type {contrastive_loss_type} not implemented")
 
         if d_type == "prod":
-            d_prod_loss = t.norm((d_f_opt * d_f_sub).sqrt(), p=1, dim=-1).mean()
+            d_prod_loss = t.norm(d_f_opt * d_f_sub, p=1, dim=-1).mean()
         else:
             raise NotImplementedError(f"Contrastive loss type {contrastive_loss_type} not implemented")
 
@@ -277,6 +277,7 @@ def trainSAE(
                 ghost_threshold=ghost_threshold,
             )
             losses["total_loss"].backward()
+            clip_grad_norm_(ae.parameters(), 1, error_if_nonfinite=True)
             optimizer.step()
             scheduler.step()
             ae.normalize_dict_()

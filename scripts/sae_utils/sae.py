@@ -55,11 +55,12 @@ class SparseAutoEncoder(nn.Module):
         less_than_1=False,
     ):
         norm = self.W_dec.norm(dim=1)
+        positive_mask = norm != 0
         if less_than_1:
-            greater_than_1_mask = norm > 1
+            greater_than_1_mask = (norm > 1) & (positive_mask)
             self.W_dec[greater_than_1_mask] /= norm[greater_than_1_mask].unsqueeze(1)
         else:
-            self.W_dec /= norm.unsqueeze(1)
+            self.W_dec[positive_mask] /= norm[positive_mask].unsqueeze(1)
 
     def encode(self, x):
         return x @ self.W_enc + self.b_enc
