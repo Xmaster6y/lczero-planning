@@ -16,6 +16,7 @@ from datasets import load_dataset
 import einops
 
 from scripts.constants import HF_TOKEN
+from scripts.sae_utils.sae import SparseAutoEncoder
 
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -26,10 +27,17 @@ hf_api = HfApi(token=HF_TOKEN)
 def main(args):
     logger.info(f"Running on {DEVICE}")
     hf_api.snapshot_download(repo_id=args.repo_id, repo_type="model", local_dir="./assets/saes")
-    ae = torch.load(
+    sae_dict = torch.load(
         f"./assets/saes/{args.source_config}/model.pt",
         map_location=DEVICE,
     )
+    sae = SparseAutoEncoder(
+        args.activation_dim,
+        args.dictionary_size,
+        pre_bias=args.pre_bias,
+        init_normalise_dict=args.init_normalise_dict,
+    )
+    sae.load_state_dict(sae_dict)
 
     init_ds = load_dataset(args.source_dataset, args.source_config, split="test")
     torch_ds = init_ds.with_format("torch")
@@ -52,25 +60,25 @@ def main(args):
 
     dataset = torch_ds.map(map_fn, batched=True)
 
-    def compute_features_fn(batch, ae):
+    def compute_features_fn(batch, sae):
         root_activations = batch["root_act"]
         opt_activations = batch["opt_act"]
         sub_activations = batch["sub_act"]
         activations = torch.cat([root_activations, opt_activations], dim=1)
         activations = activations.to(DEVICE)
-        f_pre = ae.encode(activations)
-        opt_f = ae.relu(f_pre)
+        f_pre = sae.encode(activations)
+        opt_f = sae.relu(f_pre)
         activations = torch.cat([root_activations, sub_activations], dim=1)
         activations = activations.to(DEVICE)
-        f_pre = ae.encode(activations)
-        sub_f = ae.relu(f_pre)
+        f_pre = sae.encode(activations)
+        sub_f = sae.relu(f_pre)
         return {"opt_features": opt_f, "sub_features": sub_f}
 
     features_dataset = dataset.map(
         compute_features_fn,
         batched=True,
         remove_columns=["root_act", "opt_act", "sub_act"],
-        fn_kwargs={"ae": ae},
+        fn_kwargs={"sae": sae},
     )
 
     if args.push_to_hub:
@@ -103,6 +111,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", type=int, default=1000)
+    parser.add_argument("--activation_dim", type=int, default=256)
+    parser.add_argument("--dictionary_size", type=int, default=7680)
+    parser.add_argument("--pre_bias", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--init_normalise_dict", type=str, default=None)
     return parser.parse_args()
 
 
