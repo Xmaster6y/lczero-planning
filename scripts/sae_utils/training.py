@@ -275,6 +275,8 @@ def trainSAE(
                 contrastive_loss_type=contrastive_loss_type,
                 num_samples_since_activated=num_samples_since_activated,
                 ghost_threshold=ghost_threshold,
+                explained_variance=True,
+                r2=True,
             )
             losses["total_loss"].backward()
             clip_grad_norm_(ae.parameters(), 1, error_if_nonfinite=True)
