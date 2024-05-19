@@ -327,7 +327,7 @@ def trainSAE(
                                 explained_variance=True,
                                 r2=True,
                             )
-                            for k, _ in val_losses.items():
+                            for k, _ in losses.items():
                                 if k not in val_losses:
                                     val_losses[k] = 0
                                 val_losses[k] += losses[k] / len(val_dataloader)
