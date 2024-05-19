@@ -211,7 +211,7 @@ def trainSAE(
     from_checkpoint=None,
     wandb_run=None,
     do_print=True,
-):
+) -> SparseAutoEncoder:
     """
     Train and return a sparse autoencoder
     """

@@ -119,7 +119,7 @@ def make_contrastive_run(
     else:
         model_path = f"{save_folder}/model.pt"
     torch.save(
-        sae,
+        sae.state_dict(),
         model_path,
     )
     logger.info(f"Model saved to {model_path}")
