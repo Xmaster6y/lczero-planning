@@ -47,7 +47,7 @@ def main(args):
                 else:
                     new_s_batched[k] = einops.repeat(v, "b -> (b hw) ", hw=h * w)
             else:
-                new_s_batched[k] = v * (h * w)
+                new_s_batched[k] = [item for item in v for _ in range(h * w)]
         return new_s_batched
 
     dataset = torch_ds.map(map_fn, batched=True)
