@@ -81,7 +81,7 @@ def sae_loss(
 
     f = out["features"]
     x_hat = out["x_hat"]
-    mse_loss = t.linalg.norm(activations - x_hat, dim=-1).mean()
+    mse_loss = t.nn.functional.mse_loss(x_hat, activations, reduction="none").sum(dim=1).mean()
 
     deads = (f == 0).all(dim=0)
     if num_samples_since_activated is not None:  # update the number of samples since each neuron was last activated
