@@ -61,7 +61,7 @@ def main(args):
 
     dataset = torch_ds.map(map_fn, batched=True)
 
-    def compute_features_fn(batch, sae):
+    def compute_features_fn(batch, sae: SparseAutoEncoder):
         root_activations = batch["root_act"]
         opt_activations = batch["opt_act"]
         sub_activations = batch["sub_act"]
