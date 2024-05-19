@@ -38,6 +38,7 @@ def main(args):
         init_normalise_dict=args.init_normalise_dict,
     )
     sae.load_state_dict(sae_dict)
+    sae.to(DEVICE)
 
     init_ds = load_dataset(args.source_dataset, args.source_config, split="test")
     torch_ds = init_ds.with_format("torch")
