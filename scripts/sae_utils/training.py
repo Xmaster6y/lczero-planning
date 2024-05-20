@@ -311,35 +311,72 @@ def trainSAE(
                     os.path.join(save_dir, "checkpoints", f"ae_{step}.pt"),
                 )
             if val_steps is not None and val_dataloader is not None:
-                with t.no_grad():
-                    if step % val_steps == 0:
-                        val_losses = {}
-                        for val_acts in val_dataloader:
-                            if isinstance(val_acts, t.Tensor):
-                                val_acts = val_acts.to(device)
-                            elif isinstance(val_acts, dict):
-                                val_acts = {k: v.to(device) for k, v in val_acts.items()}
-                            losses = sae_loss(
-                                val_acts,
-                                ae,
-                                sparsity_penalty,
-                                sparsity_loss_type=sparsity_loss_type,
-                                num_samples_since_activated=(num_samples_since_activated),
-                                ghost_threshold=ghost_threshold,
-                                explained_variance=True,
-                                r2=True,
-                            )
-                            for k, _ in losses.items():
-                                if k not in val_losses:
-                                    val_losses[k] = 0
-                                val_losses[k] += losses[k] / len(val_dataloader)
-
-                        if wandb_run is not None:
-                            wandb_run.log(
-                                {f"val/{k}": v for k, v in val_losses.items()},
-                                step=step,
-                            )
-                        if do_print:
-                            logger.info(f"Val step {step}: {val_losses}")
-
+                if step % val_steps == 0:
+                    eval(
+                        ae,
+                        val_dataloader,
+                        step,
+                        device,
+                        {
+                            "sparsity_penalty": sparsity_penalty,
+                            "sparsity_loss_type": sparsity_loss_type,
+                            "num_samples_since_activated": num_samples_since_activated,
+                            "ghost_threshold": ghost_threshold,
+                            "explained_variance": True,
+                            "r2": True,
+                        },
+                        wandb_run=wandb_run,
+                        do_print=do_print,
+                    )
+    eval(
+        ae,
+        val_dataloader,
+        step,
+        device,
+        {
+            "sparsity_penalty": sparsity_penalty,
+            "sparsity_loss_type": sparsity_loss_type,
+            "num_samples_since_activated": num_samples_since_activated,
+            "ghost_threshold": ghost_threshold,
+            "explained_variance": True,
+            "r2": True,
+        },
+        wandb_run=wandb_run,
+        do_print=do_print,
+    )
     return ae
+
+
+@t.no_grad
+def eval(
+    ae,
+    val_dataloader,
+    step,
+    device,
+    loss_kwargs,
+    wandb_run=None,
+    do_print=True,
+):
+    val_losses = {}
+    for val_acts in val_dataloader:
+        if isinstance(val_acts, t.Tensor):
+            val_acts = val_acts.to(device)
+        elif isinstance(val_acts, dict):
+            val_acts = {k: v.to(device) for k, v in val_acts.items()}
+        losses = sae_loss(
+            val_acts,
+            ae,
+            **loss_kwargs,
+        )
+        for k, _ in losses.items():
+            if k not in val_losses:
+                val_losses[k] = 0
+            val_losses[k] += losses[k] / len(val_dataloader)
+
+    if wandb_run is not None:
+        wandb_run.log(
+            {f"val/{k}": v for k, v in val_losses.items()},
+            step=step,
+        )
+    if do_print:
+        logger.info(f"Val step {step}: {val_losses}")
