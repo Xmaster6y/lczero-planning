@@ -39,7 +39,7 @@ def main(args):
         "cooldown_steps": 1_000,
         "dict_size_scale": args.dict_size_scale,
         "sparsity_penalty_target": args.sparsity_penalty_target,
-        "sparsity_loss_type": "l1",
+        "sparsity_loss_type": "d-l1",
         "sparsity_penalty_warmup_steps": 1_000,
         "contrastive_penalty": args.contrastive_penalty,
         "contrastive_loss_type": "diff-prod",

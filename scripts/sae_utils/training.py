@@ -195,7 +195,7 @@ def trainSAE(
     cooldown_steps=1000,
     val_dataloader=None,
     sparsity_penalty_target=0.01,
-    sparsity_loss_type="sq-l1",
+    sparsity_loss_type="l1",
     sparsity_penalty_warmup_steps=1000,
     contrastive_penalty=0.1,
     contrastive_loss_type="diff-prod",
