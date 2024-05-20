@@ -85,7 +85,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--beta1", type=float, default=0.9)
     parser.add_argument("--contrastive_penalty", type=float, default=0.001)
     parser.add_argument("--sparsity_penalty_target", type=float, default=0.001)
-    parser.add_argument("--dict_size_scale", type=int, default=30)
+    parser.add_argument("--dict_size_scale", type=int, default=8)
     parser.add_argument("--log_steps", type=int, default=100)
     parser.add_argument("--val_steps", type=int, default=1000)
     return parser.parse_args()

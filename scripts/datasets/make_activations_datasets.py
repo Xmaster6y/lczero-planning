@@ -122,7 +122,12 @@ def main(args: argparse.Namespace):
             lambda s: s["depth_opt"] >= args.min_depth and s["depth_sub0"] >= args.min_depth
         )
         if args.debug:
-            filtered_dataset = filtered_dataset.filter(lambda i, s: i < 100, with_indices=True)
+            filtered_dataset = DatasetDict(
+                {
+                    "train": filtered_dataset["train"].select(range(3000)),
+                    "test": filtered_dataset["test"].select(range(500)),
+                }
+            )
         cache_hook = CacheHook(HookConfig(module_exp=rf".*block{args.layer}/conv2/relu"))
         cache_hook.register(wrapper)
 
