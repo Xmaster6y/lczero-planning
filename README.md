@@ -1,4 +1,4 @@
-![dynamical concepts](./assets/figures/lczero-planning_thumbnail.png)
+<img src="./assets/figures/lczero-planning_thumbnail.png" alt="dynamical concepts" width="200"/>
 
 # LCZero Planning Interpretability
 
