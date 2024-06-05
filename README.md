@@ -2,6 +2,8 @@
 
 # LCZero Planning Interpretability
 
+[**Project page**](https://yp-edu.github.io/publications/lczero-planning) | [**HF Space**](https://huggingface.co/spaces/Xmaster6y/lczero-planning-demo) | [**Paper**](https://arxiv.org/abs/)
+
 Scripts for interpreting planning in LeelaChessZero networks.
 
 ## Structure
