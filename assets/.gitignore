@@ -2,3 +2,5 @@
 !.gitignore
 !records.txt
 !resolve*
+!figures
+!figures/lczero-planning_thumbnail.png

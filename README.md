@@ -1,4 +1,4 @@
-![dynamical concepts](./assets/figures/lczero-planning_dynamical-concepts.pdf)
+![dynamical concepts](./assets/figures/lczero-planning_thumbnail.png)
 
 # LCZero Planning Interpretability
 
