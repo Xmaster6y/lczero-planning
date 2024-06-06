@@ -22,6 +22,12 @@ Then to run a particular script use:
 poetry run python -m scripts.sae_training.train_contrastive
 ```
 
+To run the demo you can use the following `make` shortcut:
+
+```
+make demo
+```
+
 ## Tooling
 
 See the [lczerolens](https://github.com/Xmaster6y/lczerolens) library (still under development) for more agnostic tooling to interpret the Leela Networks.
