@@ -1,22 +1,38 @@
 <img src="./assets/figures/lczero-planning_thumbnail.png" alt="dynamical concepts" width="200"/>
 
-# LCZero Planning Interpretability
+# Contrastive Sparse Autoencoders for Interpreting Planning of Chess-Playing Agents
 
 [**Project page**](https://yp-edu.github.io/publications/lczero-planning) | [**HF Space**](https://huggingface.co/spaces/Xmaster6y/lczero-planning-demo) | [**Paper**](https://arxiv.org/abs/)
 
 Scripts for interpreting planning in LeelaChessZero networks.
 
-## Structure
+:red_circle: __*Not a stable codebase*__
 
-Structure of the repo.
+## Install & Run
+
+This work relies on poetry to manage the dependencies. To install run (with additional `demo` group for running the demo):
+
+```
+poetry install
+```
+
+Then to run a particular script use:
+
+```
+poetry run python -m scripts.sae_training.train_contrastive
+```
 
 ## Tooling
 
-See the [lczerolens] (still under development) library for more agnostic tooling to interpret the Leela Networks.
+See the [lczerolens](https://github.com/Xmaster6y/lczerolens) library (still under development) for more agnostic tooling to interpret the Leela Networks.
+
+## Contribute
+
+Feel free to open a discussion, an issue or a PR for any question or feedback.
 
 ## Cite
 
-If you find this work useful consider citing the associated paper:
+If you find this work useful please consider citing the associated paper:
 
 ```
 Bibtex
