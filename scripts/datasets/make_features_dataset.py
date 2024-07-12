@@ -90,16 +90,16 @@ def main(args):
 
 @dataclass
 class Args:
-    source_dataset: str = "Xmaster6y/lczero-planning-activations"
+    source_dataset: str = "lczero-planning/lczero-planning-activations"
     source_config: str = "debug"
-    repo_id: str = "Xmaster6y/lczero-planning-saes"
+    repo_id: str = "lczero-planning/lczero-planning-saes"
     push_to_hub: bool = False
     batch_size: int = 1000
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("train-one")
-    parser.add_argument("--source_dataset", type=str, default="Xmaster6y/lczero-planning-activations")
+    parser.add_argument("--source_dataset", type=str, default="lczero-planning/lczero-planning-activations")
     parser.add_argument(
         "--source_config",
         type=str,
@@ -108,7 +108,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--repo_id",
         type=str,
-        default="Xmaster6y/lczero-planning-saes",
+        default="lczero-planning/lczero-planning-saes",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", type=int, default=1000)

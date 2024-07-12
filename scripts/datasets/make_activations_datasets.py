@@ -165,9 +165,9 @@ def main(args: argparse.Namespace):
 
 @dataclass
 class Args:
-    source_dataset: str = "Xmaster6y/lczero-planning-trajectories"
+    source_dataset: str = "lczero-planning/lczero-planning-trajectories"
     source_config: str = "lc0-10-4238.onnx-policy"
-    dataset_name: str = "Xmaster6y/lczero-planning-activations"
+    dataset_name: str = "lczero-planning/lczero-planning-activations"
     push_to_hub: bool = False
     model_category: str = "small"
     use_all_models: bool = False
@@ -182,7 +182,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source_dataset",
         type=str,
-        default="Xmaster6y/lczero-planning-trajectories",
+        default="lczero-planning/lczero-planning-trajectories",
     )
     parser.add_argument(
         "--source_config",
@@ -192,7 +192,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="Xmaster6y/lczero-planning-activations",
+        default="lczero-planning/lczero-planning-activations",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--model_category", type=str, default="small")

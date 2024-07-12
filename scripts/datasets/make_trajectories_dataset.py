@@ -184,8 +184,8 @@ def main(args: argparse.Namespace):
 
 @dataclass
 class Args:
-    source_dataset: str = "Xmaster6y/lczero-planning-boards"
-    dataset_name: str = "Xmaster6y/lczero-planning-trajectories"
+    source_dataset: str = "lczero-planning/lczero-planning-boards"
+    dataset_name: str = "lczero-planning/lczero-planning-trajectories"
     push_to_hub: bool = False
     use_policy: bool = True
     model_category: str = "small"
@@ -204,12 +204,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source_dataset",
         type=str,
-        default="Xmaster6y/lczero-planning-boards",
+        default="lczero-planning/lczero-planning-boards",
     )
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="Xmaster6y/lczero-planning-trajectories",
+        default="lczero-planning/lczero-planning-trajectories",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--use_policy", action=argparse.BooleanOptionalAction, default=True)

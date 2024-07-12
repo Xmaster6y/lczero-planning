@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="Xmaster6y/lczero-planning-tcec",
+        default="lczerolens/tcec-games",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     return parser.parse_args()
