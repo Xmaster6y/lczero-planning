@@ -2,7 +2,7 @@
 
 # Contrastive Sparse Autoencoders for Interpreting Planning of Chess-Playing Agents
 
-[**Project page**](https://yp-edu.github.io/publications/lczero-planning) | [**HF Space**](https://huggingface.co/spaces/lczero-planning/lczero-planning-demo) | [**Paper**](http://arxiv.org/abs/2406.04028)
+[**Project page**](https://yp-edu.github.io/publications/lczero-planning) | [**HF Space**](https://huggingface.co/spaces/lczero-planning/demo) | [**Paper**](http://arxiv.org/abs/2406.04028)
 
 Scripts for interpreting planning in LeelaChessZero networks.
 

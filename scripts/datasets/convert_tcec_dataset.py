@@ -75,7 +75,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="lczero-planning/lczero-planning-boards",
+        default="lczero-planning/boards",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--n-history", type=int, default=7)

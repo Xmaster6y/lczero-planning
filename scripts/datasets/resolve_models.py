@@ -13,7 +13,7 @@ from scripts.constants import HF_TOKEN
 hf_api = HfApi(token=HF_TOKEN)
 
 hf_api.snapshot_download(
-    "lczero-planning/lczero-planning-models",
+    "lczero-planning/models",
     repo_type="model",
     local_dir="assets/models",
 )

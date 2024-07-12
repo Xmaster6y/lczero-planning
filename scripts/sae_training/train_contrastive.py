@@ -67,7 +67,7 @@ def main(args):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser("train-one")
-    parser.add_argument("--source_dataset", type=str, default="lczero-planning/lczero-planning-activations")
+    parser.add_argument("--source_dataset", type=str, default="lczero-planning/activations")
     parser.add_argument(
         "--source_config",
         type=str,
@@ -76,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--repo_id",
         type=str,
-        default="lczero-planning/lczero-planning-saes",
+        default="lczero-planning/saes",
     )
     parser.add_argument("--push_to_hub", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--batch_size", type=int, default=1000)
