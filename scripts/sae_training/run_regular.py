@@ -15,7 +15,7 @@ from scripts.sae_utils.training import trainSAE
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-class ContrastiveRunConfig(BaseModel):
+class RegularRunConfig(BaseModel):
     # Unsweepable
     source_dataset: str
     source_config: str
@@ -42,27 +42,24 @@ class ContrastiveRunConfig(BaseModel):
     sparsity_penalty_target: float
     sparsity_loss_type: str
     sparsity_penalty_warmup_steps: int
-    contrastive_penalty: float
-    contrastive_loss_type: str
     pre_bias: Optional[bool] = None
     init_normalise_dict: Optional[str] = None
 
 
-def make_contrastive_run(
-    run_config: ContrastiveRunConfig,
+def make_regular_run(
+    run_config: RegularRunConfig,
     wandb_run,
     save_folder: str,
 ):
     logger.info(f"Running on {DEVICE}")
 
     init_ds = load_dataset(run_config.source_dataset, run_config.source_config, split="train")
-    torch_ds = init_ds.select_columns(["root_act", "opt_act", "sub_act"]).with_format("torch")
+    torch_ds = init_ds["opt_act"].with_format("torch")
 
     def map_fn(s_batched):
-        b, c, h, w = s_batched["root_act"].shape
+        b, c, h, w = s_batched["opt_act"].shape
         new_s_batched = {}
-        for act_type in ["root_act", "opt_act", "sub_act"]:
-            new_s_batched[act_type] = einops.rearrange(s_batched[act_type], "b c h w -> (b h w) c")
+        new_s_batched["opt_act"] = einops.rearrange(s_batched["opt_act"], "b c h w -> (b h w) c")
         new_s_batched["pixel_index"] = einops.repeat(torch.arange(h * w), "(hw) -> (b hw) ", b=b)
         return new_s_batched
 
@@ -97,8 +94,6 @@ def make_contrastive_run(
         sparsity_penalty_target=run_config.sparsity_penalty_target,
         sparsity_loss_type=run_config.sparsity_loss_type,
         sparsity_penalty_warmup_steps=run_config.sparsity_penalty_warmup_steps,
-        contrastive_penalty=run_config.contrastive_penalty,
-        contrastive_loss_type=run_config.contrastive_loss_type,
         pre_bias=run_config.pre_bias,
         init_normalise_dict=run_config.init_normalise_dict,
         resample_steps=run_config.resample_steps,
@@ -117,7 +112,7 @@ def make_contrastive_run(
     if run_config.from_checkpoint:
         model_path = f"{save_folder}/from_{run_config.from_name}.pt"
     else:
-        model_path = f"{save_folder}/model.pt"
+        model_path = f"{save_folder}/regular_model.pt"
     torch.save(
         sae.state_dict(),
         model_path,

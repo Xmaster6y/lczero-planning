@@ -117,7 +117,8 @@ def make_contrastive_run(
     if run_config.from_checkpoint:
         model_path = f"{save_folder}/from_{run_config.from_name}.pt"
     else:
-        model_path = f"{save_folder}/model.pt"
+        prefix = "contrastive" if run_config.contrastive_penalty > 0 else "contrastive_no_penalty"
+        model_path = f"{save_folder}/{prefix}_model.pt"
     torch.save(
         sae.state_dict(),
         model_path,
