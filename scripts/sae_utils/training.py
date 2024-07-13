@@ -137,9 +137,11 @@ def sae_loss(
         out_losses["ghost_loss"] = ghost_loss
         out_losses["total_loss"] = classical_loss + ghost_loss * (mse_loss.detach() / (ghost_loss.detach() + EPS))
     if explained_variance:
-        out_losses["explained_variance"] = explained_variance_score(activations.detach().cpu(), x_hat.detach().cpu())
+        out_losses["explained_variance"] = explained_variance_score(
+            activations.detach().cpu().numpy(), x_hat.detach().cpu().numpy()
+        )
     if r2:
-        out_losses["r2_score"] = r2_score(activations.detach().cpu(), x_hat.detach().cpu())
+        out_losses["r2_score"] = r2_score(activations.detach().cpu().numpy(), x_hat.detach().cpu().numpy())
     return out_losses
 
 
