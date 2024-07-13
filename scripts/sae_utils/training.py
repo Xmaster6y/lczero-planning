@@ -211,6 +211,7 @@ def trainSAE(
     from_checkpoint=None,
     wandb_run=None,
     do_print=True,
+    streaming=False,
 ) -> SparseAutoEncoder:
     """
     Train and return a sparse autoencoder
@@ -236,7 +237,10 @@ def trainSAE(
         betas=(beta1, beta2),
         weight_decay=weight_decay,
     )
-    total_steps = n_epochs * len(train_dataloader)
+    if streaming:
+        total_steps = log_steps * 10_000
+    else:
+        total_steps = n_epochs * len(train_dataloader)
 
     def lr_fn(step):
         # cooldown
@@ -358,6 +362,7 @@ def eval(
     do_print=True,
 ):
     val_losses = {}
+    len_val = 0
     for val_acts in val_dataloader:
         if isinstance(val_acts, t.Tensor):
             val_acts = val_acts.to(device)
@@ -371,7 +376,10 @@ def eval(
         for k, _ in losses.items():
             if k not in val_losses:
                 val_losses[k] = 0
-            val_losses[k] += losses[k] / len(val_dataloader)
+            val_losses[k] += losses[k]
+        len_val += len(val_acts)
+    for k in val_losses:
+        val_losses[k] /= len_val
 
     if wandb_run is not None:
         wandb_run.log(

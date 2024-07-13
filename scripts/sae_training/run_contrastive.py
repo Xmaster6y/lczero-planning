@@ -119,6 +119,7 @@ def make_contrastive_run(
         from_checkpoint=run_config.from_checkpoint,
         wandb_run=wandb_run,
         do_print=True,
+        streaming=streaming,
     )
 
     os.makedirs(save_folder, exist_ok=True)
