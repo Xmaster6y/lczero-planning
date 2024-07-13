@@ -86,7 +86,7 @@ def make_contrastive_run(
         batch_size=run_config.batch_size,
     )
     if streaming:
-        act_dim = next(iter(train_ds)).shape[0] * 2
+        act_dim = next(iter(train_ds))["root_act"].shape[0] * 2
     else:
         act_dim = train_ds[0]["root_act"].shape[0] * 2
     dict_size = run_config.dict_size or run_config.dict_size_scale * act_dim
