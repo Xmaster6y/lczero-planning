@@ -65,9 +65,14 @@ def make_regular_run(
         return new_s_batched
 
     dataset = torch_ds.map(map_fn, batched=True)
-    splitted_ds = dataset.train_test_split(test_size=0.1)
-    train_ds = splitted_ds["train"]
-    val_ds = splitted_ds["test"]
+    if streaming:
+        dataset = dataset.shuffle(seed=42)
+        train_ds = dataset.filter(lambda x, i: i % 10 != 0, with_indices=True)
+        val_ds = dataset.filter(lambda x, i: i % 10 == 0, with_indices=True)
+    else:
+        splitted_ds = dataset.train_test_split(test_size=0.1, seed=42)
+        train_ds = splitted_ds["train"]
+        val_ds = splitted_ds["test"]
 
     train_dataloader = DataLoader(
         train_ds,
