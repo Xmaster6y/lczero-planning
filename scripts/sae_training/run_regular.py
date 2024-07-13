@@ -50,10 +50,11 @@ def make_regular_run(
     run_config: RegularRunConfig,
     wandb_run,
     save_folder: str,
+    streaming: bool = False,
 ):
     logger.info(f"Running on {DEVICE}")
 
-    init_ds = load_dataset(run_config.source_dataset, run_config.source_config, split="train")
+    init_ds = load_dataset(run_config.source_dataset, run_config.source_config, split="train", streaming=streaming)
     torch_ds = init_ds["opt_act"].with_format("torch")
 
     def map_fn(s_batched):

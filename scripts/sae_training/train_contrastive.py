@@ -52,10 +52,10 @@ def main(args):
     save_folder = f"./assets/saes/{args.source_config}"
     with wandb.init(entity="yp-edu", project="contrastive-saes", config=run_params) as wandb_run:
         try:
-            make_contrastive_run(run_config, wandb_run=wandb_run, save_folder=save_folder)
+            make_contrastive_run(run_config, wandb_run=wandb_run, save_folder=save_folder, streaming=args.streaming)
         except ValueError:
             run_config.beta1 = 0.9
-            make_contrastive_run(run_config, wandb_run=wandb_run, save_folder=save_folder)
+            make_contrastive_run(run_config, wandb_run=wandb_run, save_folder=save_folder, streaming=args.streaming)
     if args.push_to_hub:
         hf_api.upload_folder(
             repo_id=args.repo_id,
@@ -88,6 +88,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dict_size_scale", type=int, default=8)
     parser.add_argument("--log_steps", type=int, default=100)
     parser.add_argument("--val_steps", type=int, default=1000)
+    parser.add_argument("--streaming", action=argparse.BooleanOptionalAction, default=False)
     return parser.parse_args()
 
 
