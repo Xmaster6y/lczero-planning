@@ -83,9 +83,9 @@ def make_regular_run(
     )
 
     if streaming:
-        act_dim = next(iter(train_ds))["root_act"].shape[0]
+        act_dim = next(iter(train_ds))["opt_act"].shape[0]
     else:
-        act_dim = train_ds[0]["root_act"].shape[0]
+        act_dim = train_ds[0]["opt_act"].shape[0]
     dict_size = run_config.dict_size or run_config.dict_size_scale * act_dim
     sae = trainSAE(
         train_dataloader,
