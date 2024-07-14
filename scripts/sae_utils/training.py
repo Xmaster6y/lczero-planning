@@ -64,6 +64,9 @@ def sae_loss(
         d_activations = t.cat([opt_activations, sub_activations], dim=0)
         activations = t.cat([root_activations.repeat(2, 1), d_activations], dim=1)
         use_contrastive_loss = True
+    elif isinstance(acts, dict) and "root_act" not in acts:
+        use_contrastive_loss = False
+        activations = acts["opt_act"]
     else:
         use_contrastive_loss = False
         activations = acts
