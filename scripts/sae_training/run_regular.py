@@ -54,7 +54,7 @@ def make_regular_run(
     logger.info(f"Running on {DEVICE}")
 
     init_ds = load_dataset(run_config.source_dataset, run_config.source_config, split="train", streaming=streaming)
-    torch_ds = init_ds["opt_act"].with_format("torch")
+    torch_ds = init_ds.select_columns(["opt_act"]).with_format("torch")
 
     def map_fn(s_batched):
         b, c, h, w = s_batched["opt_act"].shape
