@@ -57,7 +57,7 @@ def sae_loss(
     If num_samples_since_activated is not None, update it in place
     If ghost_threshold is not None, use it to do ghost grads
     """
-    if isinstance(acts, dict):
+    if isinstance(acts, dict) and "root_act" in acts:
         root_activations = acts["root_act"]
         opt_activations = acts["opt_act"]
         sub_activations = acts["sub_act"]
