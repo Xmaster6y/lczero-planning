@@ -38,7 +38,6 @@ def main(args):
         "warmup_steps": 1_000,
         "cooldown_steps": 1_000,
         "dict_size_scale": args.dict_size_scale,
-        "sparsity_penalty_target": args.sparsity_penalty_target,
         "sparsity_loss_type": "d-l1",
         "sparsity_penalty_warmup_steps": 1_000,
     }

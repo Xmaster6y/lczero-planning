@@ -39,7 +39,6 @@ class RegularRunConfig(BaseModel):
     dict_size_scale: int
     ghost_threshold: Optional[int] = None
     resample_steps: Optional[int] = None
-    sparsity_penalty_target: float
     sparsity_loss_type: str
     sparsity_penalty_warmup_steps: int
     pre_bias: Optional[bool] = None
@@ -100,7 +99,6 @@ def make_regular_run(
         warmup_steps=run_config.warmup_steps,
         cooldown_steps=run_config.cooldown_steps,
         val_dataloader=val_dataloader,
-        sparsity_penalty_target=run_config.sparsity_penalty_target,
         sparsity_loss_type=run_config.sparsity_loss_type,
         sparsity_penalty_warmup_steps=run_config.sparsity_penalty_warmup_steps,
         pre_bias=run_config.pre_bias,
