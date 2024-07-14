@@ -1375,7 +1375,7 @@ demo = ["gradio (>=4.14.0,<5.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/Xmaster6y/lczerolens"
-reference = "HEAD"
+reference = "4964fb98e22ebe2e835f25e26b83f10e3bc5da2d"
 resolved_reference = "4964fb98e22ebe2e835f25e26b83f10e3bc5da2d"
 
 [[package]]
@@ -4109,4 +4109,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "61d8ec8ae6d2558952c5d79c1a2e4cfdb4fd0ccb5606066c5aa1339b21b42f07"
+content-hash = "ba8095fdae6c9dbaf25cde6fdc34c98a4933cc82950a17ae9713e7ce442187ce"
