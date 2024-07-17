@@ -1452,6 +1452,7 @@ develop = false
 datasets = "^2.19.1"
 einops = "^0.7.0"
 jsonlines = "^4.0.0"
+nnsight = {git = "https://github.com/Xmaster6y/nnsight", rev = "modules"}
 onnx2torch = "^1.5.13"
 python-chess = "^1.999"
 scikit-learn = "^1.4.0"
@@ -1466,8 +1467,8 @@ demo = ["gradio (>=4.14.0,<5.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/Xmaster6y/lczerolens"
-reference = "4964fb98e22ebe2e835f25e26b83f10e3bc5da2d"
-resolved_reference = "4964fb98e22ebe2e835f25e26b83f10e3bc5da2d"
+reference = "sae"
+resolved_reference = "ea61fa6a3f7ebba7b2de8c34d0d17cf9ac316111"
 
 [[package]]
 name = "loguru"
@@ -4773,4 +4774,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "3248d6e4262f398e51ce37f66b4cd420e217d9a42f880a3bb6d3e6648ed18f42"
+content-hash = "5616e6c5fc4cf6af675c2e792acca3d05e8af4740698d208022c4d054f9bad2f"
