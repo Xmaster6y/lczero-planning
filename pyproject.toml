@@ -29,6 +29,7 @@ lczerolens = {git = "https://github.com/Xmaster6y/lczerolens", rev = "4964fb98e2
 wandb = "^0.16.6"
 pydantic = "^2.7.1"
 
+nnsight = {git = "https://github.com/Xmaster6y/nnsight", rev = "modules"}
 [tool.poetry.group.dev]
 optional = true
 
