@@ -30,9 +30,9 @@ def main(args):
         "batch_size": args.batch_size,
         "module_name": args.module_name,
         "act_dim": args.act_dim,
-        "n_batches_in_buffer": 10,
-        "compute_batch_size": 100,
-        "min_depth": 10,
+        "n_batches_in_buffer": args.n_batches_in_buffer,
+        "compute_batch_size": args.compute_batch_size,
+        "min_depth": args.min_depth,
         "max_train_batches": args.max_train_batches,
         "max_val_batches": args.max_val_batches,
         "log_steps": args.log_steps,
@@ -90,6 +90,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=1000)
     parser.add_argument("--module_name", type=str, default="block9/conv2/relu")
     parser.add_argument("--act_dim", type=int, default=128)
+    parser.add_argument("--n_batches_in_buffer", type=int, default=10)
+    parser.add_argument("--compute_batch_size", type=int, default=100)
+    parser.add_argument("--min_depth", type=int, default=10)
     parser.add_argument("--max_train_batches", type=int, default=1_000)
     parser.add_argument("--max_val_batches", type=int, default=100)
     parser.add_argument("--n_epochs", type=int, default=50)
