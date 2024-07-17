@@ -79,7 +79,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source_config",
         type=str,
-        default="debug",
+        default="lc0-10-4238.onnx-policy",
     )
     parser.add_argument(
         "--repo_id",
