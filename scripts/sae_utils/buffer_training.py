@@ -249,8 +249,8 @@ def trainSAE(
 
     scheduler = t.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_fn)
     step = 0
-    for _ in range(n_epochs):
-        logger.info(f"Starting epoch {step}")
+    for epoch in range(n_epochs):
+        logger.info(f"Starting epoch {epoch}")
         for acts in train_buffer:
             if step >= total_steps:
                 break
