@@ -95,7 +95,7 @@ def make_buffer_run(
         run_config.n_batches_in_buffer,
         run_config.compute_batch_size,
         run_config.batch_size,
-        dataloader_kwargs={"collate_fn": collate_fn},
+        dataloader_kwargs={"collate_fn": collate_fn, "shuffle": True},
         logger=logger,
     )
 
@@ -106,7 +106,7 @@ def make_buffer_run(
         run_config.n_batches_in_buffer,
         run_config.compute_batch_size,
         run_config.batch_size,
-        dataloader_kwargs={"collate_fn": collate_fn},
+        dataloader_kwargs={"collate_fn": collate_fn, "shuffle": True},
         logger=logger,
     )
 
