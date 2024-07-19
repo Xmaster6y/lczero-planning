@@ -362,7 +362,7 @@ def eval(
             if k not in val_losses:
                 val_losses[k] = 0
             val_losses[k] += losses[k]
-        len_val += len(val_acts)
+        len_val += 1
     for k in val_losses:
         val_losses[k] /= len_val
 
