@@ -29,6 +29,7 @@ def main(args):
     best_params: Dict[str, Any] = {
         "batch_size": args.batch_size,
         "module_name": args.module_name,
+        "run_name": args.run_name,
         "act_dim": args.act_dim,
         "n_batches_in_buffer": args.n_batches_in_buffer,
         "compute_batch_size": args.compute_batch_size,
@@ -104,6 +105,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dict_size_scale", type=int, default=8)
     parser.add_argument("--log_steps", type=int, default=100)
     parser.add_argument("--val_steps", type=int, default=1000)
+    parser.add_argument("--run_name", type=str, default="")
     return parser.parse_args()
 
 

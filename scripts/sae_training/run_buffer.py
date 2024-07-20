@@ -28,6 +28,7 @@ class BufferRunConfig(BaseModel):
     dict_size: Optional[int] = None
     batch_size: int
     module_name: str
+    run_name: str
     act_dim: int
     n_batches_in_buffer: int
     compute_batch_size: int
@@ -153,7 +154,7 @@ def make_buffer_run(
             prefix = "contrastive" if run_config.contrastive_penalty > 0 else "contrastive_no_penalty"
         else:
             prefix = "regular"
-        model_path = f"{save_folder}/{prefix}_model.pt"
+        model_path = f"{save_folder}/{prefix}{run_config.run_name}_model.pt"
     torch.save(
         sae.state_dict(),
         model_path,
