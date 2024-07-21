@@ -1467,8 +1467,8 @@ demo = ["gradio (>=4.14.0,<5.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/Xmaster6y/lczerolens"
-reference = "sae"
-resolved_reference = "ea61fa6a3f7ebba7b2de8c34d0d17cf9ac316111"
+reference = "patching"
+resolved_reference = "20060865f83b5e6517fa8c1da932b64ef4774da3"
 
 [[package]]
 name = "loguru"
@@ -4774,4 +4774,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "5616e6c5fc4cf6af675c2e792acca3d05e8af4740698d208022c4d054f9bad2f"
+content-hash = "a4f8387cc8a448200504f4eb2495744621656947cfef648a9dee8d474b8bc549"
