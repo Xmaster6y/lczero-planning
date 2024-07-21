@@ -254,6 +254,8 @@ def trainSAE(
         for acts in train_buffer:
             if step >= total_steps:
                 break
+            if acts is None:
+                continue
             step += 1
 
             acts = acts.to(device)
