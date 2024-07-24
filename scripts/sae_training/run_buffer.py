@@ -77,7 +77,6 @@ def make_buffer_run(
     def collate_fn(batch):
         return _collate_fn(
             batch,
-            run_config.use_contrastive,
             run_config.min_depth,
         )
 
@@ -162,7 +161,7 @@ def make_buffer_run(
     logger.info(f"Model saved to {model_path}")
 
 
-def _collate_fn(batch, contrastive, min_depth):
+def _collate_fn(batch, min_depth):
     boards, infos = [], []
     for x in batch:
         fen = x["fen"]
@@ -175,27 +174,23 @@ def _collate_fn(batch, contrastive, min_depth):
             continue
         for i in range(7):
             board.push(chess.Move.from_uci(moves_opt[i]))
-        if contrastive:
-            root_fen = board.fen()
-            x["root_fen"] = root_fen
-            x["is_root"] = True
-            boards.append(board.copy(stack=7))
-            infos.append(copy.deepcopy(x))
+        root_fen = board.fen()
+        x["root_fen"] = root_fen
+        x["is_root"] = True
+        boards.append(board.copy(stack=7))
+        infos.append(copy.deepcopy(x))
         board_opt = board.copy(stack=7)
-        if contrastive:
-            board_sub = board.copy(stack=7)
+        board_sub = board.copy(stack=7)
         for i, (move_opt, move_sub) in enumerate(zip(moves_opt[7:], moves_sub[7:])):
             board_opt.push(chess.Move.from_uci(move_opt))
-            if contrastive:
-                board_sub.push(chess.Move.from_uci(move_sub))
+            board_sub.push(chess.Move.from_uci(move_sub))
             if i + 1 >= min_depth:
                 x["is_root"] = False
                 x["current_depth"] = i + 1
                 boards.append(board_opt.copy())
                 infos.append({**copy.deepcopy(x), "opt_fen": board_opt.fen()})
-                if contrastive:
-                    boards.append(board_sub.copy())
-                    infos.append({**copy.deepcopy(x), "sub_fen": board_sub.fen()})
+                boards.append(board_sub.copy())
+                infos.append({**copy.deepcopy(x), "sub_fen": board_sub.fen()})
     return boards, infos
 
 
