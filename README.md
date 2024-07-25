@@ -41,12 +41,13 @@ Feel free to open a discussion, an issue or a PR for any question or feedback.
 If you find this work useful please consider citing the associated paper:
 
 ```
-@misc{poupart2024contrastive,
+@misc{poupart2024contrastivesparseautoencodersinterpreting,
       title={Contrastive Sparse Autoencoders for Interpreting Planning of Chess-Playing Agents},
       author={Yoann Poupart},
       year={2024},
       eprint={2406.04028},
       archivePrefix={arXiv},
-      primaryClass={cs.AI}
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2406.04028},
 }
 ```
